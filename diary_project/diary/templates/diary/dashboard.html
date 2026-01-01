@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Diary Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-indigo-100">
+
+    <!-- Navigation Bar -->
+    <nav class="bg-white/80 backdrop-blur-md shadow-sm sticky top-0 z-50">
+        <div class="max-w-5xl mx-auto px-6 py-4 flex justify-between items-center">
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 bg-gradient-to-br from-purple-500 to-pink-500 rounded-xl flex items-center justify-center">
+                    <i class="fas fa-book-open text-white text-lg"></i>
+                </div>
+                <span class="text-xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+                    My Diary
+                </span>
+            </div>
+            <form method="post" action="{% url 'logout' %}">
+                {% csrf_token %}
+                <button type="submit" class="flex items-center space-x-2 px-4 py-2 text-gray-600 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all duration-300 font-medium">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span>Logout</span>
+                </button>
+            </form>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="max-w-5xl mx-auto px-6 py-10">
+
+        <!-- Welcome Section -->
+        <div class="mb-10">
+            <h1 class="text-4xl font-bold text-gray-800 mb-2">
+                Welcome back, <span class="bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">{{ request.user.username }}</span>! 👋
+            </h1>
+            <p class="text-gray-500 text-lg">Here are your personal diary entries</p>
+        </div>
+
+        <!-- Action Bar -->
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
+            <div class="flex items-center space-x-2 text-gray-500">
+                <i class="fas fa-journal-whills text-purple-500"></i>
+                <span class="font-medium">
+                    {% if entries %}
+                        {{ entries|length }} {% if entries|length == 1 %}Entry{% else %}Entries{% endif %}
+                    {% else %}
+                        No Entries Yet
+                    {% endif %}
+                </span>
+            </div>
+            <a href="{% url 'create_entry' %}" class="group flex items-center space-x-2 px-6 py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white font-semibold rounded-xl shadow-lg shadow-purple-500/30 hover:shadow-xl hover:shadow-purple-500/40 hover:scale-105 transition-all duration-300">
+                <i class="fas fa-plus group-hover:rotate-90 transition-transform duration-300"></i>
+                <span>Create New Entry</span>
+            </a>
+        </div>
+
+        <!-- Entries List -->
+        {% if entries %}
+            <div class="grid gap-4">
+                {% for entry in entries %}
+                    <div class="group bg-white rounded-2xl shadow-sm hover:shadow-xl border border-gray-100 hover:border-purple-200 transition-all duration-300 overflow-hidden">
+                        <div class="p-6">
+                            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                                <!-- Entry Info -->
+                                <div class="flex-1 min-w-0">
+                                    <a href="{% url 'entry_detail' entry.id %}" class="block group/link">
+                                        <h3 class="text-xl font-semibold text-gray-800 group-hover/link:text-purple-600 transition-colors duration-300 truncate">
+                                            {{ entry.title }}
+                                        </h3>
+                                    </a>
+                                    <div class="flex items-center space-x-2 mt-2 text-gray-400">
+                                        <i class="fas fa-calendar-alt text-sm"></i>
+                                        <time class="text-sm">{{ entry.created_at|date:"F j, Y, g:i a" }}</time>
+                                    </div>
+                                </div>
+
+                                <!-- Actions -->
+                                <div class="flex items-center space-x-2 opacity-100 sm:opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                                    <a href="{% url 'entry_detail' entry.id %}" class="flex items-center justify-center w-10 h-10 text-gray-400 hover:text-purple-600 hover:bg-purple-50 rounded-xl transition-all duration-300" title="View">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                    <a href="{% url 'edit_entry' entry.id %}" class="flex items-center justify-center w-10 h-10 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-xl transition-all duration-300" title="Edit">
+                                        <i class="fas fa-pen"></i>
+                                    </a>
+                                    <a href="{% url 'delete_entry' entry.id %}" class="flex items-center justify-center w-10 h-10 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-xl transition-all duration-300" title="Delete">
+                                        <i class="fas fa-trash-alt"></i>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Decorative gradient bar -->
+                        <div class="h-1 w-full bg-gradient-to-r from-purple-500 via-pink-500 to-indigo-500 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-500 origin-left"></div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <!-- Empty State -->
+            <div class="bg-white rounded-3xl shadow-sm border border-gray-100 p-12 text-center">
+                <div class="w-24 h-24 bg-gradient-to-br from-purple-100 to-pink-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                    <i class="fas fa-feather-alt text-4xl text-purple-500"></i>
+                </div>
+                <h3 class="text-2xl font-bold text-gray-800 mb-3">Start Your Journey</h3>
+                <p class="text-gray-500 mb-8 max-w-md mx-auto">
+                    Your diary is empty. Begin documenting your thoughts, memories, and experiences today!
+                </p>
+                <a href="{% url 'create_entry' %}" class="inline-flex items-center space-x-2 px-8 py-4 bg-gradient-to-r from-purple-600 to-pink-600 text-white font-semibold rounded-xl shadow-lg shadow-purple-500/30 hover:shadow-xl hover:shadow-purple-500/40 hover:scale-105 transition-all duration-300">
+                    <i class="fas fa-plus"></i>
+                    <span>Create Your First Entry</span>
+                </a>
+            </div>
+        {% endif %}
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="mt-20 py-8 border-t border-gray-200 bg-white/50">
+        <div class="max-w-5xl mx-auto px-6 text-center text-gray-400">
+            <p class="flex items-center justify-center space-x-2">
+                <i class="fas fa-heart text-pink-400"></i>
+                <span>Your personal space for thoughts & memories</span>
+            </p>
+        </div>
+    </footer>
+
+</body>
+</html>
